@@ -1,0 +1,11 @@
+{
+    "id": "{2C226E59-C0AF-C417-7185-C27D3DDE4060}",
+    "name": "Tahoma",
+    "type": 3,
+    "vendor": "Somfy",
+    "aliases": ["Tahoma"],
+    "parentRequirements": ["{338DCDF5-2F2C-0199-4588-2390F2DF8A77}"],
+    "childRequirements": [],
+    "implemented": ["{8B7D91D7-81AE-3C04-4336-220BBAB23927}"],
+    "prefix": "Tahoma"
+}

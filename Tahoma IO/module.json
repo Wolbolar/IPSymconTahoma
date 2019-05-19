@@ -1,0 +1,11 @@
+{
+    "id": "{469C3076-0077-7214-C7EE-72F8694AADE7}",
+    "name": "TahomaIO",
+    "type": 1,
+    "vendor": "Somfy",
+    "aliases": ["Tahoma"],
+    "parentRequirements": [],
+    "childRequirements": ["{8C2D8198-5E10-A042-6047-757EF82DDE25}"],
+    "implemented": ["{7B8E4696-0AD2-64EA-F22E-3CBD9E22D6C9}", "{32064D22-5769-C931-CBC7-6DBB7F8D1FCE}"],
+    "prefix": "TahomaIO"
+}
