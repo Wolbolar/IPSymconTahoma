@@ -83,19 +83,19 @@ class TaHomaDevice extends IPSModule
     public function Open()
     {
         $this->SendCommand('open');
-        $this->SetValue('ControlShutter', 1);
+        $this->SetValue('ControlShutter', 0);
     }
 
     public function Stop()
     {
         $this->SendCommand('stop');
-        $this->SetValue('ControlShutter', 2);
+        $this->SetValue('ControlShutter', 1);
     }
 
     public function Close()
     {
         $this->SendCommand('close');
-        $this->SetValue('ControlShutter', 3);
+        $this->SetValue('ControlShutter', 2);
     }
 
     public function RequestStatus()
