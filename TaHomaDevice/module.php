@@ -53,7 +53,7 @@ class TaHomaDevice extends IPSModule
     {
         //Shutter Control Variable
         $this->RegisterProfileAssociation(
-            'Tahoma.Control', 'Move', '', '', 0, 5, 0, 0, VARIABLETYPE_INTEGER, [
+            'Tahoma.Control', 'Move', '', '', 0, 3, 0, 0, VARIABLETYPE_INTEGER, [
                              [0, $this->Translate('Open'), 'HollowDoubleArrowUp', -1],
                              [1, $this->Translate('Stop'), 'Close', -1],
                              [2, $this->Translate('Close'), 'HollowDoubleArrowUp', -1]]
