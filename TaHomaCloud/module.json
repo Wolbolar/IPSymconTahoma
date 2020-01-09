@@ -1,0 +1,14 @@
+{
+	"id": "{6F83CEDB-BC40-63BB-C209-88D6B252C9FF}",
+	"name": "TaHoma Cloud",
+	"type": 2,
+	"vendor": "Somfy",
+	"aliases": 
+	[
+		"TaHoma Cloud"
+	],
+	"parentRequirements": [],
+	"childRequirements": ["{59020227-ED4A-9F60-F34C-E2E7771D9764}"],
+	"implemented": ["{656566E9-4C78-6C4C-2F16-63CDD4412E9E}"],
+	"prefix": "TAHOMA"
+}

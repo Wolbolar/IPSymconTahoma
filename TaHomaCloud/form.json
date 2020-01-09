@@ -1,0 +1,10 @@
+{
+	"elements": [
+		{ "type": "Button", "label": "Register", "onClick": "echo TAHOMA_Register($id);" }
+	],
+	"actions":
+	[
+		{ "type": "Label" },
+		{ "type": "Label" }
+	]
+}

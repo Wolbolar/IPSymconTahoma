@@ -1,0 +1,15 @@
+{
+	"actions":
+	[
+		{ "type": "Button", "caption": "Update", "onClick": "TAHOMA_RequestStatus($id);" },
+		{ "type": "Button", "caption": "Identify", "onClick": "TAHOMA_SendCommand($id, 'identify');" },
+		{ 
+			"type": "RowLayout",
+			"items": [
+				{ "type": "Button", "caption": "Open", "onClick": "TAHOMA_SendCommand($id, 'open');" },
+				{ "type": "Button", "caption": "Stop", "onClick": "TAHOMA_SendCommand($id, 'stop');" },
+				{ "type": "Button", "caption": "Close", "onClick": "TAHOMA_SendCommand($id, 'close');" }
+			]
+		}
+	]
+}
