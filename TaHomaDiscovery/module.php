@@ -24,18 +24,27 @@ class TaHomaDiscovery extends IPSModule
         return 0;
     }
 
+    /** List all available sites for the current user.
+     * @return mixed
+     */
+    public function GetSites()
+    {
+        $sites =  json_decode($this->SendDataToParent(json_encode([
+                                                                               'DataID'   => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
+                                                                               'Endpoint' => '/v1/site',
+                                                                               'Payload'  => ''
+                                                                           ])));
+        return $sites;
+    }
+
     public function GetConfigurationForm()
     {
         $data = json_decode(file_get_contents(__DIR__ . '/form.json'));
 
         if ($this->HasActiveParent()) {
-            $result = json_decode($this->SendDataToParent(json_encode([
-                'DataID'   => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
-                'Endpoint' => '/v1/site',
-                'Payload'  => ''
-            ])));
+            $sites = $this->GetSites();
 
-            foreach ($result as $site) {
+            foreach ($sites as $site) {
                 $data->actions[0]->values[] = [
                     'address'    => $site->id,
                     'name'       => $site->label,

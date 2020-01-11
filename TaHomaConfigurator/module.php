@@ -26,17 +26,26 @@ class TaHomaConfigurator extends IPSModule
         return 0;
     }
 
+
+    /** List all available devices for a user’s specific site.
+     * @return mixed
+     */
+    public function GetDevices()
+    {
+        $devices = json_decode($this->SendDataToParent(json_encode([
+                                                                       'DataID'   => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
+                                                                       'Endpoint' => '/v1/site/' . $this->ReadPropertyString('SiteID') . '/device',
+                                                                       'Payload'  => ''
+                                                                   ])));
+        return $devices;
+    }
+
     public function GetConfigurationForm()
     {
         $data = json_decode(file_get_contents(__DIR__ . '/form.json'));
 
         if ($this->HasActiveParent()) {
-            $devices = json_decode($this->SendDataToParent(json_encode([
-                'DataID'   => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
-                'Endpoint' => '/v1/site/' . $this->ReadPropertyString('SiteID') . '/device',
-                'Payload'  => ''
-            ])));
-
+            $devices = $this->GetDevices();
             foreach ($devices as $device) {
                 $this->SendDebug('Device', json_encode($device), 0);
 
@@ -47,13 +56,14 @@ class TaHomaConfigurator extends IPSModule
                 $data->actions[0]->values[] = [
                     'address'    => $device->id,
                     'name'       => $device->name,
-                    'type'       => $device->type,
+                    'type'       => $this->Translate($device->type),
                     'instanceID' => $this->searchDevice($device->id),
                     'create'     => [
                         'moduleID'      => '{4434685E-551F-D887-3163-006833D318E3}',
                         'configuration' => [
                             'SiteID'   => $this->ReadPropertyString('SiteID'),
-                            'DeviceID' => $device->id
+                            'DeviceID' => $device->id,
+                            'Type'     => $device->type
                         ]
                     ]
                 ];

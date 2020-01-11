@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 class TaHomaCloud extends IPSModule
 {
@@ -29,6 +28,12 @@ class TaHomaCloud extends IPSModule
         } else {
             $this->SetStatus(IS_ACTIVE);
         }
+    }
+
+    public function GetToken()
+    {
+        $token = $this->GetBuffer('AccessToken');
+        return $token;
     }
 
     private function RegisterOAuth($WebOAuth)

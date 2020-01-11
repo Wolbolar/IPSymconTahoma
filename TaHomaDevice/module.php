@@ -1,8 +1,24 @@
 <?php
-
 declare(strict_types=1);
+
+require_once(__DIR__ . "/../bootstrap.php");
+require_once __DIR__ . '/../libs/ProfileHelper.php';
+require_once __DIR__ . '/../libs/ConstHelper.php';
+
+use Fonzo\TaHoma\TaHoma;
+
 class TaHomaDevice extends IPSModule
 {
+    use ProfileHelper;
+
+    const ROLLER_SHUTTER_POSITIONABLE_STATEFUL_ROOF = 'roller_shutter_positionable_stateful_roof';
+    const EXTERIOR_BLIND_POSITIONABLE_STATEFUL_GENERIC = 'exterior_blind_positionable_stateful_generic';
+    const ROLLER_SHUTTER_DISCRETE_GENERIC = 'roller_shutter_discrete_generic';
+    const ROLLER_SHUTTER_POSITIONABLE_STATEFUL_DUAL = 'roller_shutter_positionable_stateful_dual';
+
+    // helper properties
+    private $position = 0;
+
     public function Create()
     {
         //Never delete this line!
@@ -13,6 +29,9 @@ class TaHomaDevice extends IPSModule
 
         $this->RegisterPropertyString('SiteID', '');
         $this->RegisterPropertyString('DeviceID', '');
+        $this->RegisterPropertyString('Type', '');
+        $this->RegisterAttributeString('Categories', '');
+        $this->RegisterAttributeString('Capabilities', '');
     }
 
     public function ApplyChanges()
@@ -51,6 +70,8 @@ class TaHomaDevice extends IPSModule
 
     private function RegisterVariables(): void
     {
+        $type = $this->ReadPropertyString('Type');
+
         //Shutter Control Variable
         $this->RegisterProfileAssociation(
             'Tahoma.Control', 'Move', '', '', 0, 3, 0, 0, VARIABLETYPE_INTEGER, [
@@ -58,7 +79,7 @@ class TaHomaDevice extends IPSModule
                              [1, $this->Translate('Stop'), 'Close', -1],
                              [2, $this->Translate('Close'), 'HollowDoubleArrowUp', -1]]
         );
-        $this->RegisterVariableInteger('ControlShutter', 'Control', 'Tahoma.Control', 1);
+        $this->RegisterVariableInteger('ControlShutter', $this->Translate('Control'), 'Tahoma.Control', $this->_getPosition());
         $this->EnableAction('ControlShutter');
     }
 
@@ -98,6 +119,48 @@ class TaHomaDevice extends IPSModule
         $this->SetValue('ControlShutter', 2);
     }
 
+    public function GetCommandList()
+    {
+        $data = $this->RequestStatus();
+        $type = $this->ReadPropertyString('Type');
+
+        $form = [];
+        if ($type == 1) {
+            $form = [
+                [
+                    'type' => 'Button',
+                    'caption' => 'Update',
+                    'onClick' => 'TAHOMA_RequestStatus($id);'
+                ],
+                [
+                    'type' => 'Button',
+                    'caption' => 'Identify',
+                    'onClick' => 'TAHOMA_SendCommand($id, \'identify\');'
+                ],
+                [
+                    'type' => 'RowLayout',
+                    'items' => [
+                        [
+                            'type' => 'Button',
+                            'caption' => 'open',
+                            'onClick' => 'TAHOMA_SendCommand($id, \'open\');'
+                        ],
+                        [
+                            'type' => 'Button',
+                            'caption' => 'stop',
+                            'onClick' => 'TAHOMA_SendCommand($id, \'stop\');'
+                        ],
+                        [
+                            'type' => 'Button',
+                            'caption' => 'close',
+                            'onClick' => 'TAHOMA_SendCommand($id, \'close\');'
+                        ]
+                    ]
+                ]];
+        }
+        return $form;
+    }
+
     public function RequestStatus()
     {
         $result = json_decode($this->SendDataToParent(json_encode([
@@ -105,8 +168,7 @@ class TaHomaDevice extends IPSModule
             'Endpoint' => '/v1/device/' . $this->ReadPropertyString('DeviceID'),
             'Payload'  => ''
         ])));
-
-        var_dump($result);
+        return $result;
     }
 
     public function SendCommand($name)
@@ -119,90 +181,234 @@ class TaHomaDevice extends IPSModule
                 'parameters' => []
             ])
         ])));
-
-        var_dump($result);
+        return $result;
     }
 
-    /** register profiles
-     *
-     *
-     * @param $Name
-     * @param $Icon
-     * @param $Prefix
-     * @param $Suffix
-     * @param $MinValue
-     * @param $MaxValue
-     * @param $StepSize
-     * @param $Digits
-     * @param $Vartype
+    /***********************************************************
+     * Configuration Form
+     ***********************************************************/
+
+    /**
+     * build configuration form
+     * @return string
      */
-    private function RegisterProfile($Name, $Icon, $Prefix, $Suffix, $MinValue, $MaxValue, $StepSize, $Digits, $Vartype): void
+    public function GetConfigurationForm()
     {
-
-        if (IPS_VariableProfileExists($Name)) {
-            $profile = IPS_GetVariableProfile($Name);
-            if ($profile['ProfileType'] !== $Vartype) {
-                $this->SendDebug('Profile', 'Variable profile type does not match for profile ' . $Name, 0);
-            }
-        } else {
-            IPS_CreateVariableProfile($Name, $Vartype); // 0 boolean, 1 int, 2 float, 3 string
-            $this->SendDebug('Variablenprofil angelegt', $Name, 0);
-        }
-
-        IPS_SetVariableProfileIcon($Name, $Icon);
-        IPS_SetVariableProfileText($Name, $Prefix, $Suffix);
-        IPS_SetVariableProfileDigits($Name, $Digits); //  Nachkommastellen
-        IPS_SetVariableProfileValues(
-            $Name, $MinValue, $MaxValue, $StepSize
-        ); // string $ProfilName, float $Minimalwert, float $Maximalwert, float $Schrittweite
-        $this->SendDebug(
-            'Variablenprofil konfiguriert',
-            'Name: ' . $Name . ', Icon: ' . $Icon . ', Prefix: ' . $Prefix . ', $Suffix: ' . $Suffix . ', Digits: ' . $Digits . ', MinValue: '
-            . $MinValue . ', MaxValue: ' . $MaxValue . ', StepSize: ' . $StepSize, 0
-        );
+        // return current form
+        return json_encode([
+                               'elements' => $this->FormHead(),
+                               'actions' => $this->FormActions(),
+                               'status' => $this->FormStatus()
+                           ]);
     }
 
-    /** register profile association
-     *
-     * @param $Name
-     * @param $Icon
-     * @param $Prefix
-     * @param $Suffix
-     * @param $MinValue
-     * @param $MaxValue
-     * @param $Stepsize
-     * @param $Digits
-     * @param $Vartype
-     * @param $Associations
+    /**
+     * return form configurations on configuration step
+     * @return array
      */
-    private function RegisterProfileAssociation($Name, $Icon, $Prefix, $Suffix, $MinValue, $MaxValue, $Stepsize, $Digits, $Vartype,
-                                                $Associations): void
+    protected function FormHead()
     {
-        if (is_array($Associations) && count($Associations) === 0) {
-            $MinValue = 0;
-            $MaxValue = 0;
-        }
-        $this->RegisterProfile($Name, $Icon, $Prefix, $Suffix, $MinValue, $MaxValue, $Stepsize, $Digits, $Vartype);
+        $form = [
+            [
+                'type' => 'Label',
+                'label' => 'Device ID:'
+            ],
+            [
+                'type' => 'Label',
+                'label' => $this->ReadPropertyString('DeviceID')
+            ],
+            [
+                'type' => 'Label',
+                'label' => 'Type:'
+            ],
+            [
+                'type' => 'Label',
+                'label' => $this->Translate($this->ReadPropertyString('Type'))
+            ]
+            /*,
+            [
+                'type' => 'Label',
+                'label' => 'Update interval in seconds:'
+            ],
+            [
+                'name' => 'UpdateInterval',
+                'type' => 'IntervalBox',
+                'caption' => 'seconds'
+            ]
+            */
+        ];
 
-        if (is_array($Associations)) {
-            //zunächst werden alte Assoziationen gelöscht
-            //bool IPS_SetVariableProfileAssociation ( string $ProfilName, float $Wert, string $Name, string $Icon, integer $Farbe )
-            if ($Vartype === 1 || $Vartype === 2) // 0 boolean, 1 int, 2 float, 3 string
-            {
-                foreach (IPS_GetVariableProfile($Name)['Associations'] as $Association) {
-                    IPS_SetVariableProfileAssociation($Name, $Association['Value'], '', '', -1);
-                }
-            }
+        return $form;
+    }
 
-            //dann werden die aktuellen eingetragen
-            foreach ($Associations as $Association) {
-                IPS_SetVariableProfileAssociation($Name, $Association[0], $Association[1], $Association[2], $Association[3]);
-            }
-        } else {
-            $Associations = $this->$Associations;
-            foreach ($Associations as $code => $association) {
-                IPS_SetVariableProfileAssociation($Name, $code, $this->Translate($association), $Icon, -1);
-            }
+    /**
+     * return form actions by token
+     * @return array
+     */
+    protected function FormActions()
+    {
+
+
+        $Type = $this->ReadPropertyString('Type');
+        $form = [];
+        if ($Type == self::EXTERIOR_BLIND_POSITIONABLE_STATEFUL_GENERIC || $Type == self::ROLLER_SHUTTER_DISCRETE_GENERIC || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_DUAL || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_ROOF) {
+            $form = [
+                [
+                    'type' => 'Button',
+                    'caption' => 'Update',
+                    'onClick' => 'TAHOMA_RequestStatus($id);'
+                ],
+                [
+                    'type' => 'Button',
+                    'caption' => 'Identify',
+                    'onClick' => 'TAHOMA_SendCommand($id, \'identify\');'
+                ],
+                [
+                    'type' => 'RowLayout',
+                    'items' => [
+                        [
+                            'type' => 'Button',
+                            'caption' => 'open',
+                            'onClick' => 'TAHOMA_SendCommand($id, \'open\');'
+                        ],
+                        [
+                            'type' => 'Button',
+                            'caption' => 'stop',
+                            'onClick' => 'TAHOMA_SendCommand($id, \'stop\');'
+                        ],
+                        [
+                            'type' => 'Button',
+                            'caption' => 'close',
+                            'onClick' => 'TAHOMA_SendCommand($id, \'close\');'
+                        ]
+                    ]
+                ]
+            ];
+        } else if ($Type == 2) {
+            $form = [
+                [
+                    'type' => 'Button',
+                    'caption' => 'Update',
+                    'onClick' => 'TAHOMA_RequestStatus($id);'
+                ],
+                [
+                    'type' => 'Button',
+                    'caption' => 'Identify',
+                    'onClick' => 'TAHOMA_SendCommand($id, \'identify\');'
+                ],
+                [
+                    'type' => 'RowLayout',
+                    'items' => [
+                        [
+                            'type' => 'Button',
+                            'caption' => 'open',
+                            'onClick' => 'TAHOMA_SendCommand($id, \'open\');'
+                        ],
+                        [
+                            'type' => 'Button',
+                            'caption' => 'stop',
+                            'onClick' => 'TAHOMA_SendCommand($id, \'stop\');'
+                        ],
+                        [
+                            'type' => 'Button',
+                            'caption' => 'close',
+                            'onClick' => 'TAHOMA_SendCommand($id, \'close\');'
+                        ]
+                    ]
+                ]
+            ];
+        } else if ($Type == 3) {
+            $form = [
+                [
+                    'type' => 'Button',
+                    'caption' => 'Update',
+                    'onClick' => 'TAHOMA_RequestStatus($id);'
+                ],
+                [
+                    'type' => 'Button',
+                    'caption' => 'Identify',
+                    'onClick' => 'TAHOMA_SendCommand($id, \'identify\');'
+                ],
+                [
+                    'type' => 'RowLayout',
+                    'items' => [
+                        [
+                            'type' => 'Button',
+                            'caption' => 'open',
+                            'onClick' => 'TAHOMA_SendCommand($id, \'open\');'
+                        ],
+                        [
+                            'type' => 'Button',
+                            'caption' => 'stop',
+                            'onClick' => 'TAHOMA_SendCommand($id, \'stop\');'
+                        ],
+                        [
+                            'type' => 'Button',
+                            'caption' => 'close',
+                            'onClick' => 'TAHOMA_SendCommand($id, \'close\');'
+                        ]
+                    ]
+                ]
+            ];
         }
+
+        return $form;
+    }
+
+    /**
+     * return from status
+     * @return array
+     */
+    protected function FormStatus()
+    {
+        $form = [
+            [
+                'code' => IS_CREATING,
+                'icon' => 'inactive',
+                'caption' => 'Creating instance.'
+            ],
+            [
+                'code' => IS_ACTIVE,
+                'icon' => 'active',
+                'caption' => 'TaHoma device created.'
+            ],
+            [
+                'code' => IS_INACTIVE,
+                'icon' => 'inactive',
+                'caption' => 'interface closed.'
+            ],
+            [
+                'code' => 201,
+                'icon' => 'inactive',
+                'caption' => 'Please follow the instructions.'
+            ],
+            [
+                'code' => 202,
+                'icon' => 'error',
+                'caption' => 'Device code must not be empty.'
+            ],
+            [
+                'code' => 203,
+                'icon' => 'error',
+                'caption' => 'Device code has not the correct lenght.'
+            ],
+            [
+                'code' => 204,
+                'icon' => 'error',
+                'caption' => 'no type selected.'
+            ]
+        ];
+
+        return $form;
+    }
+
+    /**
+     * return incremented position
+     * @return int
+     */
+    private function _getPosition()
+    {
+        $this->position++;
+        return $this->position;
     }
 }

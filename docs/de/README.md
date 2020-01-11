@@ -37,7 +37,7 @@ Anschließend oben rechts auf das Symbol für den Modulstore (IP-Symcon > 5.1) k
 Im Suchfeld nun
 
 ```
-Tahoma
+TaHoma
 ```  
 
 eingeben

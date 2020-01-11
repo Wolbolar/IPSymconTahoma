@@ -37,7 +37,7 @@ Then click on the module store (IP-Symcon > 5.1) icon in the upper right corner.
 In the search field type
 
 ```
-Tahoma
+TaHoma
 ```  
 
 

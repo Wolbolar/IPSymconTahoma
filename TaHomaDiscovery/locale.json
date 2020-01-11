@@ -1,0 +1,20 @@
+{
+  "translations": {
+    "de": {
+      "Configurator": "Konfigurator",
+      "roller_shutter_positionable_stateful_roof": "positionierbarer Rollladen",
+      "roller_shutter_positionable_stateful_dual": "positionierbarer Rollladen",
+      "roller_shutter": "Rollladen",
+      "actuator": "Aktuator",
+      "position": "Position",
+      "identify": "identifizieren",
+      "close": "schließen",
+      "open": "öffnen",
+      "stop": "stop",
+      "exterior_blind_positionable_stateful_generic": "positionierbare Außenjalousie",
+      "exterior_blind": "Außenjalousie",
+      "roller_shutter_discrete_generic": "Rollladen",
+      "hub_tahoma_2": "TaHoma Hub 2"
+    }
+  }
+}
