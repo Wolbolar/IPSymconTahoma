@@ -1,0 +1,14 @@
+{
+    "id": "{0AEE6E12-86BF-D8A1-90EA-66C9D45D052E}",
+    "name": "TaHoma Configurator",
+    "type": 4,
+    "vendor": "Somfy",
+    "aliases": 
+    [
+        "TaHoma Configurator"
+    ],
+	"parentRequirements": ["{656566E9-4C78-6C4C-2F16-63CDD4412E9E}"],
+	"childRequirements": [],
+	"implemented": ["{59020227-ED4A-9F60-F34C-E2E7771D9764}"],
+    "prefix": "TAHOMA"
+}

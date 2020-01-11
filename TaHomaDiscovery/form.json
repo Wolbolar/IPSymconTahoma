@@ -1,0 +1,27 @@
+{
+    "actions": [
+        {
+            "type": "Configurator",
+            "name": "Configurator",
+            "caption": "Configurator",
+            "delete": false,
+            "columns": [
+                {
+                    "label": "Address",
+                    "name": "address",
+                    "width": "350px"
+                },
+                {
+                    "label": "Name",
+                    "name": "name",
+                    "width": "auto"
+                }
+            ],
+            "sort": {
+                "column": "name",
+                "direction": "ascending"
+            },
+            "values": []
+        }
+    ]
+}

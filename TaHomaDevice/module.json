@@ -1,0 +1,14 @@
+{
+	"id": "{4434685E-551F-D887-3163-006833D318E3}",
+	"name": "TaHoma Device",
+	"type": 3,
+	"vendor": "Somfy",
+	"aliases": 
+	[
+		"TaHoma Device"
+	],
+	"parentRequirements": ["{656566E9-4C78-6C4C-2F16-63CDD4412E9E}"],
+	"childRequirements": [],
+	"implemented": ["{59020227-ED4A-9F60-F34C-E2E7771D9764}"],
+	"prefix": "TAHOMA"
+}

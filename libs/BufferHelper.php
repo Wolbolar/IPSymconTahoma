@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-trait TahomaBufferHelper
+trait BufferHelper
 {
     /**
      * Wert einer Eigenschaft aus den InstanceBuffer lesen.

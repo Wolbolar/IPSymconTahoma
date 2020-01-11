@@ -1,0 +1,14 @@
+{
+    "id": "{AEA10BAD-6BFA-600C-B6AC-BA096AD95397}",
+    "name": "TaHoma Discovery",
+    "type": 5,
+    "vendor": "Somfy",
+    "aliases": 
+    [
+        "TaHoma Discovery"
+    ],
+	"parentRequirements": ["{656566E9-4C78-6C4C-2F16-63CDD4412E9E}"],
+	"childRequirements": [],
+	"implemented": ["{59020227-ED4A-9F60-F34C-E2E7771D9764}"],
+    "prefix": "TAHOMA"
+}
