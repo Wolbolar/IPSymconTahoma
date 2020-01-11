@@ -21,7 +21,7 @@ Control Somfy devices via Somfy Cloud API.
 	  
 ## 2. Requirements
 
-- IPS 5.x.
+- IPS 5.2.
 - Logitech Harmony Hub on the same network as IP Symcon
 
 ## 3. Installation
@@ -30,7 +30,7 @@ Control Somfy devices via Somfy Cloud API.
 
 Open the IP Console's web console with _http://{IP-Symcon IP}:3777/console/_.
 
-Then click on the module store (IP-Symcon > 5.1) icon in the upper right corner.
+Then click on the module store (IP-Symcon > 5.2) icon in the upper right corner.
 
 ![Store](img/store_icon.png?raw=true "open store")
 
@@ -48,47 +48,25 @@ Then select the module and click _Install_
 ![Store](img/install_en.png?raw=true "install")
 
 
-#### Install alternative via Modules instance
-
-_Open_ the object tree.
-
-![Objektbaum](img/object_tree.png?raw=true "object tree")	
-
-Open the instance _'Modules'_ below core instances in the object tree of IP-Symcon (>= Ver 5.x) with a double-click and press the _Plus_ button.
-
-![Modules](img/modules.png?raw=true "modules")	
-
-![Plus](img/plus.png?raw=true "Plus")	
-
-![ModulURL](img/add_module.png?raw=true "Add Module")
- 
-Enter the following URL in the field and confirm with _OK_:
-
-
-```	
-https://github.com/Wolbolar/IPSymconTahoma
-```
-    
-and confirm with _OK_.    
-    
-Then an entry for the module appears in the list of the instance _Modules_
-
-By default, the branch _master_ is loaded, which contains current changes and adjustments.
-Only the _master_ branch is kept current.
-
-![Master](img/master.png?raw=true "master") 
-
-If an older version of IP-Symcon smaller than version 5.1 (min 4.3) is used, click on the gear on the right side of the list.
-It opens another window,
-
-![SelectBranch](img/select_branch_en.png?raw=true "select branch") 
-
-here you can switch to another branch, for older versions smaller than 5.1 (min 4.3) select _Old-Version_ .
-
-
 ## 4. Function reference
 
+Öpen
+```php
+TAHOMA_Open(integer $InstanceID)
+``` 
+Parameter _$InstanceID_ ObjektID TaHoma device
 
+Close
+```php
+TAHOMA_Close(integer $InstanceID)
+``` 
+Parameter _$InstanceID_ ObjektID TaHoma device
+
+Stop
+```php
+TAHOMA_Stop(integer $InstanceID)
+``` 
+Parameter _$InstanceID_ ObjektID TaHoma device
 
 ## 5. Configuration:
 
