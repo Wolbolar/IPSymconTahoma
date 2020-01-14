@@ -24,7 +24,8 @@
       "Control": "Steuerung",
       "Device ID:": "Geräte ID",
       "Type:": "Typ:",
-      "TaHoma device created.": "TaHoma Gerät erstellt."
+      "TaHoma device created.": "TaHoma Gerät erstellt.",
+      "This device can only created by the TaHoma configurator, please use the TaHoma configurator for creating TaHoma devices.": "Dieses Gerät kann nur durch einen TaHoma Konfiguartor erzeugt werden und nicht manuell, bitte benutzten Sie den TaHoma Konfigurator zum anlegen von einem neuen Gerät."
     }
   }
 }
