@@ -15,6 +15,9 @@
       "roller_shutter_discrete_generic": "Rollladen",
       "hub_tahoma_2": "TaHoma Hub 2",
       "Configurator": "Konfigurator",
+      "Address": "Adresse",
+      "Type": "Typ",
+      "Name": "Name",
       "Site ID": "Seiten ID"
     }
   }

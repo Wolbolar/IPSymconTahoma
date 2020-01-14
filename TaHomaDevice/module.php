@@ -46,9 +46,44 @@ class TaHomaDevice extends IPSModule
         if (IPS_GetKernelRunlevel() !== KR_READY) {
             return;
         }
+        $this->ValidateConfiguration();
 
-        $this->RegisterVariables();
     }
+
+    private function ValidateConfiguration()
+    {
+        $SiteID = $this->ReadPropertyString('SiteID');
+        $DeviceID = $this->ReadPropertyString('DeviceID');
+        $Type = $this->ReadPropertyString('Type');
+
+        if($SiteID == '' || $DeviceID == '' || $Type == '')
+        {
+            $this->SetStatus(205);
+        }
+        elseif($SiteID != '' && $DeviceID != '' && $Type != '')
+        {
+            $this->RegisterVariables();
+            $this->SetStatus(IS_ACTIVE);
+        }
+    }
+
+    private function CheckRequest()
+    {
+        $SiteID = $this->ReadPropertyString('SiteID');
+        $DeviceID = $this->ReadPropertyString('DeviceID');
+        $Type = $this->ReadPropertyString('Type');
+        $data = false;
+        if($SiteID == '' || $DeviceID == '' || $Type == '')
+        {
+            $this->SetStatus(205);
+        }
+        elseif($SiteID != '' && $DeviceID != '' && $Type != '')
+        {
+            $data = $this->RequestStatus();
+        }
+        return $data;
+    }
+
 
     /** @noinspection PhpMissingParentCallCommonInspection */
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
@@ -279,40 +314,51 @@ class TaHomaDevice extends IPSModule
      */
     protected function FormHead()
     {
-        $data = $this->RequestStatus();
-        $form = [
-            [
-                'type' => 'Label',
-                'label' => 'Device ID:'
-            ],
-            [
-                'type' => 'Label',
-                'label' => $this->ReadPropertyString('DeviceID')
-            ],
-            [
-                'type' => 'Label',
-                'label' => 'Type:'
-            ],
-            [
-                'type' => 'Label',
-                'label' => $this->Translate($this->ReadPropertyString('Type'))
-            ]
-        ];
-        if (count($data->states) > 0) {
-            $form = array_merge_recursive(
-                $form, [
-                         [
-                             'type' => 'Label',
-                             'label' => 'Update interval in seconds:'
-                         ],
-                         [
-                             'name' => 'updateinterval',
-                             'type' => 'IntervalBox',
-                             'caption' => 'seconds'
-                         ]]
-            );
+        $data = $this->CheckRequest();
+        if($data != false)
+        {
+            $form = [
+                [
+                    'type' => 'Label',
+                    'label' => 'Device ID:'
+                ],
+                [
+                    'type' => 'Label',
+                    'label' => $this->ReadPropertyString('DeviceID')
+                ],
+                [
+                    'type' => 'Label',
+                    'label' => 'Type:'
+                ],
+                [
+                    'type' => 'Label',
+                    'label' => $this->Translate($this->ReadPropertyString('Type'))
+                ]
+            ];
+            if (count($data->states) > 0) {
+                $form = array_merge_recursive(
+                    $form, [
+                             [
+                                 'type' => 'Label',
+                                 'label' => 'Update interval in seconds:'
+                             ],
+                             [
+                                 'name' => 'updateinterval',
+                                 'type' => 'IntervalBox',
+                                 'caption' => 'seconds'
+                             ]]
+                );
+            }
         }
-
+        else
+        {
+            $form = [
+                [
+                    'type' => 'Label',
+                    'label' => 'This device can only created by the TaHoma configurator, please use the TaHoma configurator for creating TaHoma devices.'
+                ]
+            ];
+        }
         return $form;
     }
 
@@ -471,6 +517,11 @@ class TaHomaDevice extends IPSModule
                 'code' => 204,
                 'icon' => 'error',
                 'caption' => 'no type selected.'
+            ],
+            [
+                'code' => 205,
+                'icon' => 'error',
+                'caption' => 'This device can only created by the TaHoma configurator, please use the TaHoma configurator for creating TaHoma devices.'
             ]
         ];
 

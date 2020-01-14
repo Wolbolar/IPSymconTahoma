@@ -14,7 +14,7 @@
             "delete": false,
             "columns": [
                 {
-                    "label": "Address",
+                    "caption": "Address",
                     "name": "address",
                     "width": "350px"
                 },
@@ -24,7 +24,7 @@
                     "width": "350px"
                 },
                 {
-                    "label": "Name",
+                    "caption": "Name",
                     "name": "name",
                     "width": "auto"
                 }
