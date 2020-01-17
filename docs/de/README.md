@@ -22,6 +22,7 @@ Steuerung von Somfy Geräten über die Somfy API.
 
  - IPS 5.2
  - Somfy TaHoma
+ - IP-Symcon Connect
 
 ## 3. Installation
 
@@ -50,6 +51,54 @@ und schließend das Modul auswählen und auf _Installieren_
 
 drücken.
 
+### b. Somfy-Cloud
+Es wird ein Account bei Somfy benötigt, den man für die TaHoma Box nutzt.
+
+Um Zugriff auf die TaHoma Box über die Somfy APi zu erhalten muss zunächst IP-Smyon als System authentifiziert werden.
+Hierzu wird ein aktives IP-Symcon Connect benötigt und den normalen Somfy Benutzernamen und Passwort.
+Zunächst wird beim installieren des Modul gefragt ob eine Discovery Instanz angelegt werden soll, dies beantwortet man mit ja, man kann aber auch die Discovery Instanz von Hand selber anlegen
+
+![Success](img/discovery.png?raw=true "discovery")
+
+### c. Authentifizierung bei Somfy
+Anschließend erscheint ein Fenster Schnittstelle konfigurieren, hier drückt man auf den Knopf _Registrieren_ und hält seinen Somfy Benutzernamen und Passwort bereit.
+
+![Schnittstelle](img/schnittstelle.png?raw=true "Schnittstelle")
+
+Es öffnet sich die Anmeldeseite von Somfy. Hier gibt man in die Maske den Somfy Benutzernamen und das Somfy Passwort an und fährt mit dem klickt auf _Anmelden_ fort.
+
+![Anmeldung](img/somfy_anmeldung.png?raw=true "Anmeldung")
+
+Jetzt wird man von Somfy gefragt ob IP-Symcon als System die persönlichen Geräte auslesen darf, die Somfy Geräte steuern sowie den Status der Geräte auslesen darf.
+HIer muss man nun mit _Ja_ bestätigen um IP-Symcon zu erlauben die TaHoma Box zu steuern und damit auch die Somfy Geräte steuern zu können.
+
+![Genehmigung](img/genehmigung.png?raw=true "Genehmigung")
+
+Es erscheint dann eine Bestätigung durch IP-Symcon das die Authentifizierung erfolgreich war,
+ 
+![Success](img/sucess.png?raw=true "Success")
+ 
+anschließend kann das Browser Fenster geschlossen werden und man kehrt zu IP-Symcon zurück.
+Zurück beim Fenster Schnittstelle konfigurieren geht man nun auf _Weiter_
+
+Nun öffen wir die Discovery Instanz im Objekt Baum zu finden unter _Discovery Instanzen_. Hier wählen wir den TaHoma Account aus und wählen _Erstellen_.
+
+![Discovery](img/discovery1.png?raw=true "discoverywindow")
+
+### d. Einrichtung des Konfigurator-Moduls
+
+Jetzt wechseln wir im Objektbaum in die Instanz _**TaHoma**_ (Typ TaHoma Configurator) zu finden unter _Konfigurator Instanzen_.
+
+![config](img/config.png?raw=true "config")
+
+Hier werden alle Geräte, die bei Somfy unter dem Account registiert sind und von der Somfy API unterstützt werden aufgeführt.
+
+Ein einzelnes Gerät kann man durch markieren auf das Gerät und ein Druck auf den Button _Erstellen_ erzeugen. Der Konfigurator legt dann eine Geräte Instanz an.
+
+### e. Einrichtung der Geräteinstanz
+Eine manuelle Einrichtung eines Gerätemoduls ist nicht erforderlich, das erfolgt über den Konfigurator. In dem Geräte-Modul ist gegebenenfalls nur das Abfrage-Intervall anzupassen, die anderen Felder, insbesondere die Seriennummer (diese ist die Identifikation des Gerätes) und die Geräte-Typ-ID (diese steuert, welche Variablen angelegt werden) sind vom Konfigurator vorgegeben.
+
+
 ## 4. Funktionsreferenz
 
 Öffnen
@@ -69,6 +118,14 @@ Stop
 TAHOMA_Stop(integer $InstanceID)
 ``` 
 Parameter _$InstanceID_ ObjektID des TaHoma Geräts
+
+Status und Geräteparameter abfragen
+```php
+TAHOMA_RequestStatus(integer $InstanceID)
+``` 
+Parameter _$InstanceID_ ObjektID des TaHoma Geräts
+
+Gibt den Status des Geräts zurück insofern das Gerät über einen Gerätestatus verfügt. Es wird ein Arry mit den Geräteparametern und unterstützten Befehlen für das Gerät zurückgegeben.
   
 
 ## 5. Konfiguration:
