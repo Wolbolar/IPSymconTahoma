@@ -137,7 +137,7 @@ class TaHomaDevice extends IPSModule
             'Tahoma.Control', 'Move', '', '', 0, 3, 0, 0, VARIABLETYPE_INTEGER, [
                              [0, $this->Translate('Open'), 'HollowDoubleArrowUp', -1],
                              [1, $this->Translate('Stop'), 'Close', -1],
-                             [2, $this->Translate('Close'), 'HollowDoubleArrowUp', -1]]
+                             [2, $this->Translate('Close'), 'HollowDoubleArrowDown', -1]]
         );
         $this->RegisterVariableInteger('ControlShutter', $this->Translate('Control'), 'Tahoma.Control', $this->_getPosition());
         $this->EnableAction('ControlShutter');
