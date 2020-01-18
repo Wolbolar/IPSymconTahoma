@@ -54,18 +54,18 @@ drücken.
 ### b. Somfy-Cloud
 Es wird ein Account bei Somfy benötigt, den man für die TaHoma Box nutzt.
 
-Um Zugriff auf die TaHoma Box über die Somfy APi zu erhalten muss zunächst IP-Smyon als System authentifiziert werden.
+Um Zugriff auf die TaHoma Box über die Somfy APi zu erhalten muss zunächst IP-Symcon als System authentifiziert werden.
 Hierzu wird ein aktives IP-Symcon Connect benötigt und den normalen Somfy Benutzernamen und Passwort.
-Zunächst wird beim installieren des Modul gefragt ob eine Discovery Instanz angelegt werden soll, dies beantwortet man mit ja, man kann aber auch die Discovery Instanz von Hand selber anlegen
+Zunächst wird beim installieren des Modul gefragt ob eine Discovery Instanz angelegt werden soll, dies beantwortet man mit _ja_, man kann aber auch die Discovery Instanz von Hand selber anlegen
 
-![Success](img/discovery.png?raw=true "discovery")
+![Discovery](img/discovery.png?raw=true "discovery")
 
 ### c. Authentifizierung bei Somfy
 Anschließend erscheint ein Fenster Schnittstelle konfigurieren, hier drückt man auf den Knopf _Registrieren_ und hält seinen Somfy Benutzernamen und Passwort bereit.
 
 ![Schnittstelle](img/schnittstelle.png?raw=true "Schnittstelle")
 
-Es öffnet sich die Anmeldeseite von Somfy. Hier gibt man in die Maske den Somfy Benutzernamen und das Somfy Passwort an und fährt mit dem klickt auf _Anmelden_ fort.
+Es öffnet sich die Anmeldeseite von Somfy. Hier gibt man in die Maske den Somfy Benutzernamen und das Somfy Passwort an und fährt mit einem Klick auf _Anmelden_ fort.
 
 ![Anmeldung](img/somfy_anmeldung.png?raw=true "Anmeldung")
 
@@ -133,3 +133,14 @@ Gibt den Status des Geräts zurück insofern das Gerät über einen Gerätestatu
 
 
 ## 6. Anhang
+
+###  GUIDs und Datenaustausch:
+
+#### TaHoma Cloud:
+
+GUID: `{6F83CEDB-BC40-63BB-C209-88D6B252C9FF}` 
+
+
+#### TaHoma Device:
+
+GUID: `{4434685E-551F-D887-3163-006833D318E3}` 
