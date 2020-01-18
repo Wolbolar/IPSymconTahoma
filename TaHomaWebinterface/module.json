@@ -1,0 +1,14 @@
+{
+	"id": "{2EF70394-2A2E-FDA0-0C30-DE22489F2C7A}",
+	"name": "TaHoma Webinterface",
+	"type": 3,
+	"vendor": "Somfy",
+	"aliases": 
+	[
+		"TaHoma Webinterface"
+	],
+	"parentRequirements": [],
+	"childRequirements": [],
+	"implemented": [],
+	"prefix": "TAHOMA"
+}
