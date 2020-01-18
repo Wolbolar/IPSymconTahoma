@@ -117,6 +117,13 @@ TAHOMA_Stop(integer $InstanceID)
 ``` 
 Parameter _$InstanceID_ ObjektID TaHoma device
 
+Position
+```php
+TAHOMA_Position(integer $InstanceID, integer $Position)
+``` 
+Parameter _$InstanceID_ ObjektID des TaHoma Geräts
+Parameter _$Position_ Position 0 -100
+
 Query status and device parameters
 ```php
 TAHOMA_RequestStatus(integer $InstanceID)
