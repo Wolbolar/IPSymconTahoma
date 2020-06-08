@@ -35,6 +35,10 @@ class TaHomaDevice extends IPSModule
         $this->RegisterAttributeString('states', '[]');
         $this->RegisterAttributeBoolean('available', true);
         $this->RegisterPropertyInteger('updateinterval', 5);
+        $this->RegisterAttributeInteger('ControlShutter', 1);
+        $this->RegisterAttributeInteger('position', 0);
+        $this->RegisterAttributeBoolean('low_speed', false);
+        $this->RegisterAttributeBoolean('low_speed_enabled', false);
         $this->RegisterTimer('TaHomaUpdate', 0, 'TAHOMA_UpdateStatus(' . $this->InstanceID . ');');
     }
 
@@ -105,8 +109,9 @@ class TaHomaDevice extends IPSModule
         }
         foreach ($capabilities as $capability) {
             if ($capability->name === 'position') {
-                $this->RegisterVariableInteger('position', $this->Translate('Position'), '~Intensity.100', $this->_getPosition());
-                $this->EnableAction('position');
+                $this->SetupVariable(
+                    'position', $this->Translate('Position'), '~Intensity.100', $this->_getPosition(), VARIABLETYPE_INTEGER, true, true
+                );
             }
         }
 
@@ -117,8 +122,65 @@ class TaHomaDevice extends IPSModule
                 [1, $this->Translate('Stop'), 'Close', -1],
                 [2, $this->Translate('Close'), 'HollowDoubleArrowDown', -1]]
         );
-        $this->RegisterVariableInteger('ControlShutter', $this->Translate('Control'), 'Tahoma.Control', $this->_getPosition());
-        $this->EnableAction('ControlShutter');
+        $this->SetupVariable(
+            'ControlShutter', $this->Translate('Control'), 'Tahoma.Control', $this->_getPosition(), VARIABLETYPE_INTEGER, true, true
+        );
+
+        $this->SetupVariable(
+            'low_speed', $this->Translate('low speed'), '~Switch', $this->_getPosition(), VARIABLETYPE_BOOLEAN, true, false
+        );
+    }
+
+    /** Variable anlegen / löschen
+     *
+     * @param $ident
+     * @param $name
+     * @param $profile
+     * @param $position
+     * @param $vartype
+     * @param $visible
+     *
+     * @return bool|int
+     */
+    protected function SetupVariable($ident, $name, $profile, $position, $vartype, $enableaction, $visible = false)
+    {
+        $objid = false;
+        if ($visible) {
+            $this->SendDebug('TaHoma Variable:', 'Variable with Ident ' . $ident . ' is visible', 0);
+        } else {
+            $visible = $this->ReadAttributeBoolean($ident . '_enabled');
+            $this->SendDebug('TaHoma Variable:', 'Variable with Ident ' . $ident . ' is shown ' . print_r($visible, true), 0);
+        }
+        if ($visible == true) {
+            switch ($vartype) {
+                case VARIABLETYPE_BOOLEAN:
+                    $objid = $this->RegisterVariableBoolean($ident, $name, $profile, $position);
+                    $value = $this->ReadAttributeBoolean($ident);
+                    break;
+                case VARIABLETYPE_INTEGER:
+                    $objid = $this->RegisterVariableInteger($ident, $name, $profile, $position);
+                    $value = $this->ReadAttributeInteger($ident);
+                    break;
+                case VARIABLETYPE_FLOAT:
+                    $objid = $this->RegisterVariableFloat($ident, $name, $profile, $position);
+                    $value = $this->ReadAttributeFloat($ident);
+                    break;
+                case VARIABLETYPE_STRING:
+                    $objid = $this->RegisterVariableString($ident, $name, $profile, $position);
+                    $value = $this->ReadAttributeString($ident);
+                    break;
+            }
+            $this->SetValue($ident, $value);
+            if ($enableaction) {
+                $this->EnableAction($ident);
+            }
+        } else {
+            $objid = @$this->GetIDForIdent($ident);
+            if ($objid > 0) {
+                $this->UnregisterVariable($ident);
+            }
+        }
+        return $objid;
     }
 
     private function SetTaHomaInterval($tahoma_interval): void
@@ -157,6 +219,9 @@ class TaHomaDevice extends IPSModule
         if ($Ident === 'position') {
             $this->Position($Value);
         }
+        if ($Ident === 'low_speed') {
+            $this->SetLowSpeedMode($Value);
+        }
     }
 
     public function Open()
@@ -192,11 +257,20 @@ class TaHomaDevice extends IPSModule
 
     public function Position(int $position)
     {
+        $low_speed = $this->ReadAttributeBoolean('low_speed');
+        if($low_speed)
+        {
+            $name = 'position_low_speed';
+        }
+        else{
+            $name = 'position';
+        }
+
         $result = json_decode($this->SendDataToParent(json_encode([
             'DataID' => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
             'Endpoint' => '/v1/device/' . $this->ReadPropertyString('DeviceID') . '/exec',
             'Payload' => json_encode([
-                'name' => 'position',
+                'name' => $name,
                 'parameters' => [['name' => 'position', 'value' => $position]]
             ])
         ])));
@@ -211,9 +285,33 @@ class TaHomaDevice extends IPSModule
             foreach ($data->states as $state) {
                 if ($state->name === 'position') {
                     $this->SetValue('position', $state->value);
+                    $this->WriteAttributeInteger('position', intval($state->value));
                 }
             }
         }
+    }
+
+
+    public function SetLowSpeedMode(bool $value)
+    {
+        $this->WriteAttributeBoolean('low_speed', $value);
+        if ($value) {
+            $this->SendDebug('TaHoma Low Speed Mode', 'enabled', 0);
+        } else {
+            $this->SendDebug('TaHoma Low Speed Mode', 'disabled', 0);
+        }
+        $this->RegisterVariables();
+    }
+
+    public function SetWebFrontVariable(string $ident, bool $value)
+    {
+        $this->WriteAttributeBoolean($ident, $value);
+        if ($value) {
+            $this->SendDebug('TaHoma Webfront Variable', $ident . ' enabled', 0);
+        } else {
+            $this->SendDebug('TaHoma Webfront Variable', $ident . ' disabled', 0);
+        }
+        $this->RegisterVariables();
     }
 
     public function GetCommandList()
@@ -371,6 +469,28 @@ class TaHomaDevice extends IPSModule
         $form = [];
         if ($Type == self::EXTERIOR_BLIND_POSITIONABLE_STATEFUL_GENERIC || $Type == self::ROLLER_SHUTTER_DISCRETE_GENERIC || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_DUAL || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_ROOF) {
             $form = [
+                [
+                    'type' => 'Label',
+                    'label' => 'Change to low speed mode'
+                ],
+                [
+                    'type'    => 'RowLayout',
+                    'visible' => true,
+                    'items'   => [
+                        [
+                            'type'    => 'CheckBox',
+                            'name'    => 'low_speed',
+                            'visible' => true,
+                            'caption' => 'set low speed mode',
+                            'value'   => $this->ReadAttributeBoolean('low_speed'),
+                            'onClick' => 'TAHOMA_SetLowSpeedMode($id, $low_speed);'],
+                        [
+                            'name'     => 'low_speed_enabled',
+                            'type'     => 'CheckBox',
+                            'caption'  => 'Create Variable for Webfront',
+                            'visible'  => true,
+                            'value'    => $this->ReadAttributeBoolean('low_speed_enabled'),
+                            'onChange' => 'TAHOMA_SetWebFrontVariable($id, "low_speed_enabled", $low_speed_enabled);'],]],
                 [
                     'type' => 'Button',
                     'caption' => 'Update',
