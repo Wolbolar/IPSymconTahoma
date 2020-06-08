@@ -38,54 +38,6 @@ class TaHomaDevice extends IPSModule
         $this->RegisterTimer('TaHomaUpdate', 0, 'TAHOMA_UpdateStatus(' . $this->InstanceID . ');');
     }
 
-    public function ApplyChanges()
-    {
-        //Never delete this line!
-        parent::ApplyChanges();
-
-        if (IPS_GetKernelRunlevel() !== KR_READY) {
-            return;
-        }
-        $this->ValidateConfiguration();
-
-    }
-
-    private function ValidateConfiguration()
-    {
-        $SiteID = $this->ReadPropertyString('SiteID');
-        $DeviceID = $this->ReadPropertyString('DeviceID');
-        $Type = $this->ReadPropertyString('Type');
-
-        if($SiteID == '' || $DeviceID == '' || $Type == '')
-        {
-            $this->SetStatus(205);
-        }
-        elseif($SiteID != '' && $DeviceID != '' && $Type != '')
-        {
-            $this->RegisterVariables();
-            $this->SetStatus(IS_ACTIVE);
-        }
-    }
-
-    private function CheckRequest()
-    {
-        $SiteID = $this->ReadPropertyString('SiteID');
-        $DeviceID = $this->ReadPropertyString('DeviceID');
-        $Type = $this->ReadPropertyString('Type');
-        $data = false;
-        if($SiteID == '' || $DeviceID == '' || $Type == '')
-        {
-            $this->SetStatus(205);
-        }
-        elseif($SiteID != '' && $DeviceID != '' && $Type != '')
-        {
-            $data = $this->RequestStatus();
-        }
-        return $data;
-    }
-
-
-    /** @noinspection PhpMissingParentCallCommonInspection */
     public function MessageSink($TimeStamp, $SenderID, $Message, $Data)
     {
 
@@ -107,6 +59,35 @@ class TaHomaDevice extends IPSModule
         }
     }
 
+    public function ApplyChanges()
+    {
+        //Never delete this line!
+        parent::ApplyChanges();
+
+        if (IPS_GetKernelRunlevel() !== KR_READY) {
+            return;
+        }
+        $this->ValidateConfiguration();
+
+    }
+
+    private function ValidateConfiguration()
+    {
+        $SiteID = $this->ReadPropertyString('SiteID');
+        $DeviceID = $this->ReadPropertyString('DeviceID');
+        $Type = $this->ReadPropertyString('Type');
+
+        if ($SiteID == '' || $DeviceID == '' || $Type == '') {
+            $this->SetStatus(205);
+        } elseif ($SiteID != '' && $DeviceID != '' && $Type != '') {
+            $this->RegisterVariables();
+            $this->SetStatus(IS_ACTIVE);
+        }
+    }
+
+
+    /** @noinspection PhpMissingParentCallCommonInspection */
+
     private function RegisterVariables(): void
     {
         // $type = $this->ReadPropertyString('Type');
@@ -118,15 +99,12 @@ class TaHomaDevice extends IPSModule
         $capabilities = $data->capabilities;
         $this->WriteAttributeString('capabilities', json_encode($capabilities));
 
-        if(count($data->states) > 0)
-        {
+        if (count($data->states) > 0) {
             $tahoma_interval = $this->ReadPropertyInteger('updateinterval');
             $this->SetTaHomaInterval($tahoma_interval);
         }
-        foreach($capabilities as $capability)
-        {
-            if($capability->name === 'position')
-            {
+        foreach ($capabilities as $capability) {
+            if ($capability->name === 'position') {
                 $this->RegisterVariableInteger('position', $this->Translate('Position'), '~Intensity.100', $this->_getPosition());
                 $this->EnableAction('position');
             }
@@ -135,15 +113,32 @@ class TaHomaDevice extends IPSModule
         //Shutter Control Variable
         $this->RegisterProfileAssociation(
             'Tahoma.Control', 'Move', '', '', 0, 3, 0, 0, VARIABLETYPE_INTEGER, [
-                             [0, $this->Translate('Open'), 'HollowDoubleArrowUp', -1],
-                             [1, $this->Translate('Stop'), 'Close', -1],
-                             [2, $this->Translate('Close'), 'HollowDoubleArrowDown', -1]]
+                [0, $this->Translate('Open'), 'HollowDoubleArrowUp', -1],
+                [1, $this->Translate('Stop'), 'Close', -1],
+                [2, $this->Translate('Close'), 'HollowDoubleArrowDown', -1]]
         );
         $this->RegisterVariableInteger('ControlShutter', $this->Translate('Control'), 'Tahoma.Control', $this->_getPosition());
         $this->EnableAction('ControlShutter');
     }
 
+    private function SetTaHomaInterval($tahoma_interval): void
+    {
+        $interval = $tahoma_interval * 1000;
+        $this->SetTimerInterval('TaHomaUpdate', $interval);
+    }
+
     /** @noinspection PhpMissingParentCallCommonInspection */
+
+    /**
+     * return incremented position
+     * @return int
+     */
+    private function _getPosition()
+    {
+        $this->position++;
+        return $this->position;
+    }
+
     public function RequestAction($Ident, $Value)
     {
         if ($Ident === 'ControlShutter') {
@@ -164,45 +159,23 @@ class TaHomaDevice extends IPSModule
         }
     }
 
-    public function UpdateStatus()
-    {
-        $data = $this->RequestStatus();
-        if(count($data->states) > 0)
-        {
-            foreach($data->states as $state)
-            {
-                if($state->name === 'position')
-                {
-                    $this->SetValue('position', $state->value);
-                }
-            }
-        }
-    }
-
-    private function SetTaHomaInterval($tahoma_interval): void
-    {
-        $interval     = $tahoma_interval * 1000;
-        $this->SetTimerInterval('TaHomaUpdate', $interval);
-    }
-
-    public function Position(int $position)
-    {
-        $result = json_decode($this->SendDataToParent(json_encode([
-                                                                      'DataID'   => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
-                                                                      'Endpoint' => '/v1/device/' . $this->ReadPropertyString('DeviceID') . '/exec',
-                                                                      'Payload'  => json_encode([
-                                                                                                    'name'       => 'position',
-                                                                                                    'parameters' => [$position]
-                                                                                                ])
-                                                                  ])));
-        $this->SetValue('Position', $position);
-        return $result;
-    }
-
     public function Open()
     {
         $this->SendCommand('open');
         $this->SetValue('ControlShutter', 0);
+    }
+
+    public function SendCommand($name)
+    {
+        $result = json_decode($this->SendDataToParent(json_encode([
+            'DataID' => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
+            'Endpoint' => '/v1/device/' . $this->ReadPropertyString('DeviceID') . '/exec',
+            'Payload' => json_encode([
+                'name' => $name,
+                'parameters' => []
+            ])
+        ])));
+        return $result;
     }
 
     public function Stop()
@@ -215,6 +188,32 @@ class TaHomaDevice extends IPSModule
     {
         $this->SendCommand('close');
         $this->SetValue('ControlShutter', 2);
+    }
+
+    public function Position(int $position)
+    {
+        $result = json_decode($this->SendDataToParent(json_encode([
+            'DataID' => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
+            'Endpoint' => '/v1/device/' . $this->ReadPropertyString('DeviceID') . '/exec',
+            'Payload' => json_encode([
+                'name' => 'position',
+                'parameters' => [['name' => 'position', 'value' => $position]]
+            ])
+        ])));
+        $this->SetValue('Position', $position);
+        return $result;
+    }
+
+    public function UpdateStatus()
+    {
+        $data = $this->RequestStatus();
+        if (count($data->states) > 0) {
+            foreach ($data->states as $state) {
+                if ($state->name === 'position') {
+                    $this->SetValue('position', $state->value);
+                }
+            }
+        }
     }
 
     public function GetCommandList()
@@ -259,41 +258,6 @@ class TaHomaDevice extends IPSModule
         return $form;
     }
 
-    public function RequestStatus()
-    {
-        $data = json_decode($this->SendDataToParent(json_encode([
-            'DataID'   => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
-            'Endpoint' => '/v1/device/' . $this->ReadPropertyString('DeviceID'),
-            'Payload'  => ''
-        ])));
-        $categories = $data->categories;
-        $this->WriteAttributeString('categories', json_encode($categories));
-        $states = $data->states;
-        $this->WriteAttributeString('states', json_encode($states));
-        $capabilities = $data->capabilities;
-        $this->WriteAttributeString('capabilities', json_encode($capabilities));
-        $available = $data->available;
-        $this->WriteAttributeBoolean('available', $available);
-        return $data;
-    }
-
-    public function SendCommand($name)
-    {
-        $result = json_decode($this->SendDataToParent(json_encode([
-            'DataID'   => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
-            'Endpoint' => '/v1/device/' . $this->ReadPropertyString('DeviceID') . '/exec',
-            'Payload'  => json_encode([
-                'name'       => $name,
-                'parameters' => []
-            ])
-        ])));
-        return $result;
-    }
-
-    /***********************************************************
-     * Configuration Form
-     ***********************************************************/
-
     /**
      * build configuration form
      * @return string
@@ -302,11 +266,15 @@ class TaHomaDevice extends IPSModule
     {
         // return current form
         return json_encode([
-                               'elements' => $this->FormHead(),
-                               'actions' => $this->FormActions(),
-                               'status' => $this->FormStatus()
-                           ]);
+            'elements' => $this->FormHead(),
+            'actions' => $this->FormActions(),
+            'status' => $this->FormStatus()
+        ]);
     }
+
+    /***********************************************************
+     * Configuration Form
+     ***********************************************************/
 
     /**
      * return form configurations on configuration step
@@ -315,8 +283,7 @@ class TaHomaDevice extends IPSModule
     protected function FormHead()
     {
         $data = $this->CheckRequest();
-        if($data != false)
-        {
+        if ($data != false) {
             $form = [
                 [
                     'type' => 'Label',
@@ -338,20 +305,18 @@ class TaHomaDevice extends IPSModule
             if (count($data->states) > 0) {
                 $form = array_merge_recursive(
                     $form, [
-                             [
-                                 'type' => 'Label',
-                                 'label' => 'Update interval in seconds:'
-                             ],
-                             [
-                                 'name' => 'updateinterval',
-                                 'type' => 'IntervalBox',
-                                 'caption' => 'seconds'
-                             ]]
+                        [
+                            'type' => 'Label',
+                            'label' => 'Update interval in seconds:'
+                        ],
+                        [
+                            'name' => 'updateinterval',
+                            'type' => 'IntervalBox',
+                            'caption' => 'seconds'
+                        ]]
                 );
             }
-        }
-        else
-        {
+        } else {
             $form = [
                 [
                     'type' => 'Label',
@@ -360,6 +325,38 @@ class TaHomaDevice extends IPSModule
             ];
         }
         return $form;
+    }
+
+    private function CheckRequest()
+    {
+        $SiteID = $this->ReadPropertyString('SiteID');
+        $DeviceID = $this->ReadPropertyString('DeviceID');
+        $Type = $this->ReadPropertyString('Type');
+        $data = false;
+        if ($SiteID == '' || $DeviceID == '' || $Type == '') {
+            $this->SetStatus(205);
+        } elseif ($SiteID != '' && $DeviceID != '' && $Type != '') {
+            $data = $this->RequestStatus();
+        }
+        return $data;
+    }
+
+    public function RequestStatus()
+    {
+        $data = json_decode($this->SendDataToParent(json_encode([
+            'DataID' => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
+            'Endpoint' => '/v1/device/' . $this->ReadPropertyString('DeviceID'),
+            'Payload' => ''
+        ])));
+        $categories = $data->categories;
+        $this->WriteAttributeString('categories', json_encode($categories));
+        $states = $data->states;
+        $this->WriteAttributeString('states', json_encode($states));
+        $capabilities = $data->capabilities;
+        $this->WriteAttributeString('capabilities', json_encode($capabilities));
+        $available = $data->available;
+        $this->WriteAttributeBoolean('available', $available);
+        return $data;
     }
 
     /**
@@ -526,15 +523,5 @@ class TaHomaDevice extends IPSModule
         ];
 
         return $form;
-    }
-
-    /**
-     * return incremented position
-     * @return int
-     */
-    private function _getPosition()
-    {
-        $this->position++;
-        return $this->position;
     }
 }
