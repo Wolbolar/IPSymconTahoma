@@ -274,7 +274,7 @@ class TaHomaDevice extends IPSModule
                 'parameters' => [['name' => 'position', 'value' => $position]]
             ])
         ])));
-        $this->SetValue('Position', $position);
+        $this->SetValue('position', $position);
         return $result;
     }
 
