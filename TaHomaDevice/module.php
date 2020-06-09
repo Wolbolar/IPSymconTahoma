@@ -15,6 +15,7 @@ class TaHomaDevice extends IPSModule
     const EXTERIOR_BLIND_POSITIONABLE_STATEFUL_GENERIC = 'exterior_blind_positionable_stateful_generic';
     const ROLLER_SHUTTER_DISCRETE_GENERIC = 'roller_shutter_discrete_generic';
     const ROLLER_SHUTTER_POSITIONABLE_STATEFUL_DUAL = 'roller_shutter_positionable_stateful_dual';
+    const ROLLER_SHUTTER_POSITIONABLE_STATEFUL_RS100 = 'roller_shutter_positionable_stateful_rs100';
 
     // helper properties
     private $position = 0;
@@ -467,7 +468,7 @@ class TaHomaDevice extends IPSModule
 
         $Type = $this->ReadPropertyString('Type');
         $form = [];
-        if ($Type == self::EXTERIOR_BLIND_POSITIONABLE_STATEFUL_GENERIC || $Type == self::ROLLER_SHUTTER_DISCRETE_GENERIC || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_DUAL || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_ROOF) {
+        if ($Type == self::EXTERIOR_BLIND_POSITIONABLE_STATEFUL_GENERIC || $Type == self::ROLLER_SHUTTER_DISCRETE_GENERIC || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_DUAL || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_ROOF || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_RS100) {
             $form = [
                 [
                     'type' => 'Label',
