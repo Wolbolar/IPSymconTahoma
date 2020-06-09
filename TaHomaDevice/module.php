@@ -632,6 +632,45 @@ class TaHomaDevice extends IPSModule
                     ]
                 ]
             ];
+        }else{
+
+            $form = [
+                [
+                    'type' => 'Label',
+                    'label' => 'Change to low speed mode'
+                ],
+                [
+                    'type'    => 'RowLayout',
+                    'visible' => true,
+                    'items'   => [
+                        [
+                            'type'    => 'CheckBox',
+                            'name'    => 'low_speed',
+                            'visible' => true,
+                            'caption' => 'set low speed mode',
+                            'value'   => $this->ReadAttributeBoolean('low_speed'),
+                            'onClick' => 'TAHOMA_SetLowSpeedMode($id, $low_speed);'],
+                        [
+                            'name'     => 'low_speed_enabled',
+                            'type'     => 'CheckBox',
+                            'caption'  => 'Create Variable for Webfront',
+                            'visible'  => true,
+                            'value'    => $this->ReadAttributeBoolean('low_speed_enabled'),
+                            'onChange' => 'TAHOMA_SetWebFrontVariable($id, "low_speed_enabled", $low_speed_enabled);'],]],
+                [
+                    'type' => 'Button',
+                    'caption' => 'Update',
+                    'onClick' => 'TAHOMA_RequestStatus($id);'
+                ],
+                [
+                    'type' => 'Button',
+                    'caption' => 'Identify',
+                    'onClick' => 'TAHOMA_SendCommand($id, \'identify\');'
+                ],
+                [
+                    'type' => 'TestCenter',
+                ]
+            ];
         }
 
         return $form;
