@@ -231,7 +231,7 @@ class TaHomaDevice extends IPSModule
         $this->SetValue('ControlShutter', 0);
     }
 
-    public function SendCommand($name)
+    public function SendCommand(string $name)
     {
         $result = json_decode($this->SendDataToParent(json_encode([
             'DataID' => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
@@ -239,6 +239,25 @@ class TaHomaDevice extends IPSModule
             'Payload' => json_encode([
                 'name' => $name,
                 'parameters' => []
+            ])
+        ])));
+        return $result;
+    }
+
+    public function SendCustomCommand(string $name, string $parameter = null)
+    {
+        if ($parameter !== null) {
+            $parameter = json_decode($parameter, true);
+        }
+        else{
+            $parameter = [];
+        }
+        $result = json_decode($this->SendDataToParent(json_encode([
+            'DataID' => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
+            'Endpoint' => '/v1/device/' . $this->ReadPropertyString('DeviceID') . '/exec',
+            'Payload' => json_encode([
+                'name' => $name,
+                'parameters' => $parameter
             ])
         ])));
         return $result;
