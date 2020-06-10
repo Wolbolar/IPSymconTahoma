@@ -15,6 +15,7 @@ class TaHomaDevice extends IPSModule
     const EXTERIOR_BLIND_POSITIONABLE_STATEFUL_GENERIC = 'exterior_blind_positionable_stateful_generic';
     const ROLLER_SHUTTER_DISCRETE_GENERIC = 'roller_shutter_discrete_generic';
     const ROLLER_SHUTTER_POSITIONABLE_STATEFUL_DUAL = 'roller_shutter_positionable_stateful_dual';
+    const ROLLER_SHUTTER_POSITIONABLE_STATEFUL_RS100 = 'roller_shutter_positionable_stateful_rs100';
 
     // helper properties
     private $position = 0;
@@ -230,7 +231,7 @@ class TaHomaDevice extends IPSModule
         $this->SetValue('ControlShutter', 0);
     }
 
-    public function SendCommand($name)
+    public function SendCommand(string $name)
     {
         $result = json_decode($this->SendDataToParent(json_encode([
             'DataID' => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
@@ -238,6 +239,25 @@ class TaHomaDevice extends IPSModule
             'Payload' => json_encode([
                 'name' => $name,
                 'parameters' => []
+            ])
+        ])));
+        return $result;
+    }
+
+    public function SendCustomCommand(string $name, string $parameter = null)
+    {
+        if ($parameter !== null) {
+            $parameter = json_decode($parameter, true);
+        }
+        else{
+            $parameter = [];
+        }
+        $result = json_decode($this->SendDataToParent(json_encode([
+            'DataID' => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
+            'Endpoint' => '/v1/device/' . $this->ReadPropertyString('DeviceID') . '/exec',
+            'Payload' => json_encode([
+                'name' => $name,
+                'parameters' => $parameter
             ])
         ])));
         return $result;
@@ -467,7 +487,7 @@ class TaHomaDevice extends IPSModule
 
         $Type = $this->ReadPropertyString('Type');
         $form = [];
-        if ($Type == self::EXTERIOR_BLIND_POSITIONABLE_STATEFUL_GENERIC || $Type == self::ROLLER_SHUTTER_DISCRETE_GENERIC || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_DUAL || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_ROOF) {
+        if ($Type == self::EXTERIOR_BLIND_POSITIONABLE_STATEFUL_GENERIC || $Type == self::ROLLER_SHUTTER_DISCRETE_GENERIC || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_DUAL || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_ROOF || $Type == self::ROLLER_SHUTTER_POSITIONABLE_STATEFUL_RS100) {
             $form = [
                 [
                     'type' => 'Label',
@@ -525,6 +545,28 @@ class TaHomaDevice extends IPSModule
         } else if ($Type == 2) {
             $form = [
                 [
+                    'type' => 'Label',
+                    'label' => 'Change to low speed mode'
+                ],
+                [
+                    'type'    => 'RowLayout',
+                    'visible' => true,
+                    'items'   => [
+                        [
+                            'type'    => 'CheckBox',
+                            'name'    => 'low_speed',
+                            'visible' => true,
+                            'caption' => 'set low speed mode',
+                            'value'   => $this->ReadAttributeBoolean('low_speed'),
+                            'onClick' => 'TAHOMA_SetLowSpeedMode($id, $low_speed);'],
+                        [
+                            'name'     => 'low_speed_enabled',
+                            'type'     => 'CheckBox',
+                            'caption'  => 'Create Variable for Webfront',
+                            'visible'  => true,
+                            'value'    => $this->ReadAttributeBoolean('low_speed_enabled'),
+                            'onChange' => 'TAHOMA_SetWebFrontVariable($id, "low_speed_enabled", $low_speed_enabled);'],]],
+                [
                     'type' => 'Button',
                     'caption' => 'Update',
                     'onClick' => 'TAHOMA_RequestStatus($id);'
@@ -558,6 +600,28 @@ class TaHomaDevice extends IPSModule
         } else if ($Type == 3) {
             $form = [
                 [
+                    'type' => 'Label',
+                    'label' => 'Change to low speed mode'
+                ],
+                [
+                    'type'    => 'RowLayout',
+                    'visible' => true,
+                    'items'   => [
+                        [
+                            'type'    => 'CheckBox',
+                            'name'    => 'low_speed',
+                            'visible' => true,
+                            'caption' => 'set low speed mode',
+                            'value'   => $this->ReadAttributeBoolean('low_speed'),
+                            'onClick' => 'TAHOMA_SetLowSpeedMode($id, $low_speed);'],
+                        [
+                            'name'     => 'low_speed_enabled',
+                            'type'     => 'CheckBox',
+                            'caption'  => 'Create Variable for Webfront',
+                            'visible'  => true,
+                            'value'    => $this->ReadAttributeBoolean('low_speed_enabled'),
+                            'onChange' => 'TAHOMA_SetWebFrontVariable($id, "low_speed_enabled", $low_speed_enabled);'],]],
+                [
                     'type' => 'Button',
                     'caption' => 'Update',
                     'onClick' => 'TAHOMA_RequestStatus($id);'
@@ -586,6 +650,45 @@ class TaHomaDevice extends IPSModule
                             'onClick' => 'TAHOMA_SendCommand($id, \'close\');'
                         ]
                     ]
+                ]
+            ];
+        }else{
+
+            $form = [
+                [
+                    'type' => 'Label',
+                    'label' => 'Change to low speed mode'
+                ],
+                [
+                    'type'    => 'RowLayout',
+                    'visible' => true,
+                    'items'   => [
+                        [
+                            'type'    => 'CheckBox',
+                            'name'    => 'low_speed',
+                            'visible' => true,
+                            'caption' => 'set low speed mode',
+                            'value'   => $this->ReadAttributeBoolean('low_speed'),
+                            'onClick' => 'TAHOMA_SetLowSpeedMode($id, $low_speed);'],
+                        [
+                            'name'     => 'low_speed_enabled',
+                            'type'     => 'CheckBox',
+                            'caption'  => 'Create Variable for Webfront',
+                            'visible'  => true,
+                            'value'    => $this->ReadAttributeBoolean('low_speed_enabled'),
+                            'onChange' => 'TAHOMA_SetWebFrontVariable($id, "low_speed_enabled", $low_speed_enabled);'],]],
+                [
+                    'type' => 'Button',
+                    'caption' => 'Update',
+                    'onClick' => 'TAHOMA_RequestStatus($id);'
+                ],
+                [
+                    'type' => 'Button',
+                    'caption' => 'Identify',
+                    'onClick' => 'TAHOMA_SendCommand($id, \'identify\');'
+                ],
+                [
+                    'type' => 'TestCenter',
                 ]
             ];
         }
