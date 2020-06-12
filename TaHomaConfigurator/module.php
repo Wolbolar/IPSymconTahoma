@@ -3,6 +3,7 @@
 declare(strict_types=1);
 class TaHomaConfigurator extends IPSModule
 {
+
     public function Create()
     {
         //Never delete this line!
@@ -40,6 +41,11 @@ class TaHomaConfigurator extends IPSModule
         return $devices;
     }
 
+    private function GetDeviceTypeName($device_type)
+    {
+        return str_replace('_', ' ', $device_type);
+    }
+
     public function GetConfigurationForm()
     {
         $data = json_decode(file_get_contents(__DIR__ . '/form.json'));
@@ -56,7 +62,7 @@ class TaHomaConfigurator extends IPSModule
                 $data->actions[0]->values[] = [
                     'address'    => $device->id,
                     'name'       => $device->name,
-                    'type'       => $this->Translate($device->type),
+                    'type'       => $this->Translate($this->GetDeviceTypeName($device->type)),
                     'instanceID' => $this->searchDevice($device->id),
                     'create'     => [
                         'moduleID'      => '{4434685E-551F-D887-3163-006833D318E3}',

@@ -11,11 +11,13 @@ class TaHomaDevice extends IPSModule
 {
     use ProfileHelper;
 
-    const ROLLER_SHUTTER_POSITIONABLE_STATEFUL_ROOF = 'roller_shutter_positionable_stateful_roof';
-    const EXTERIOR_BLIND_POSITIONABLE_STATEFUL_GENERIC = 'exterior_blind_positionable_stateful_generic';
-    const ROLLER_SHUTTER_DISCRETE_GENERIC = 'roller_shutter_discrete_generic';
-    const ROLLER_SHUTTER_POSITIONABLE_STATEFUL_DUAL = 'roller_shutter_positionable_stateful_dual';
-    const ROLLER_SHUTTER_POSITIONABLE_STATEFUL_RS100 = 'roller_shutter_positionable_stateful_rs100';
+    private const ROLLER_SHUTTER_POSITIONABLE_STATEFUL_ROOF = 'roller_shutter_positionable_stateful_roof';
+    private const EXTERIOR_BLIND_POSITIONABLE_STATEFUL_GENERIC = 'exterior_blind_positionable_stateful_generic';
+    private const ROLLER_SHUTTER_DISCRETE_GENERIC = 'roller_shutter_discrete_generic';
+    private const ROLLER_SHUTTER_POSITIONABLE_STATEFUL_DUAL = 'roller_shutter_positionable_stateful_dual';
+    private const ROLLER_SHUTTER_POSITIONABLE_STATEFUL_RS100 = 'roller_shutter_positionable_stateful_rs100';
+    private const ROLLER_SHUTTER = 'roller_shutter'; // Rollladen
+    private const EXTERIOR_BLIND = 'exterior_blind'; // Außenjalousie
 
     // helper properties
     private $position = 0;
