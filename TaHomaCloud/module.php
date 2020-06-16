@@ -234,7 +234,7 @@ class TaHomaCloud extends IPSModule
 
         //Check Sonos connection
         if ($this->ReadAttributeString('Token') == '') {
-            $data->actions[1]->label = 'TaHoma: Pleae register with your Somfy account!';
+            $data->actions[1]->label = 'TaHoma: Please register with your Somfy account!';
         } else {
             $result = json_decode(@$this->GetData($this->apiURL . '/v1/site'));
 

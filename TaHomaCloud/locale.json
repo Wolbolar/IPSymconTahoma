@@ -14,7 +14,11 @@
       "exterior_blind": "Außenjalousie",
       "roller_shutter_discrete_generic": "Rollladen",
       "hub_tahoma_2": "TaHoma Hub 2",
-      "Register": "Registrieren"
+      "Register": "Registrieren",
+      "Error: Symcon Connect is not active!": "Fehler: Symcon Connect ist nicht aktiv!",
+      "Status: Symcon Connect is OK!": "Status: Symcon Connect ist verfügbar!",
+      "TaHoma: Please register with your Somfy account!": "TaHoma: Bitte registireren Sie sich mit dem Somfy Benutzerkonto!",
+      "TaHoma: Error. Please check your internet connection or register again!": "TaHoma: Fehler. Bitte die Internetverbindung überprüfen oder erneut registrieren!"
     }
   }
 }
