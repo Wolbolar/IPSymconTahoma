@@ -185,6 +185,11 @@ class TaHomaCloud extends IPSModule
         return $Token;
     }
 
+    public function GetAllUserSite()
+    {
+        return json_decode($this->GetData($this->apiURL . '/v1/site'));
+    }
+
     private function GetData($url)
     {
         $opts = [
@@ -235,31 +240,137 @@ class TaHomaCloud extends IPSModule
         }
     }
 
+    /**
+     * build configuration form
+     * @return string
+     */
     public function GetConfigurationForm()
     {
-        $data = json_decode(file_get_contents(__DIR__ . '/form.json'));
+        // return current form
+        $Form = json_encode([
+            'elements' => $this->FormHead(),
+            'actions' => $this->FormActions(),
+            'status' => $this->FormStatus()
+        ]);
+        $this->SendDebug('FORM', $Form, 0);
+        $this->SendDebug('FORM', json_last_error_msg(), 0);
+        return $Form;
+    }
 
-        //Check Connect availability
-        $ids = IPS_GetInstanceListByModuleID('{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}');
-        if (IPS_GetInstance($ids[0])['InstanceStatus'] != 102) {
-            $data->actions[0]->label = 'Error: Symcon Connect is not active!';
-        } else {
-            $data->actions[0]->label = 'Status: Symcon Connect is OK!';
-        }
-
-        //Check Sonos connection
+    /**
+     * return form configurations on configuration step
+     * @return array
+     */
+    protected function FormHead()
+    {
+        $visibility_register = false;
+        //Check Gardena connection
         if ($this->ReadAttributeString('Token') == '') {
-            $data->actions[1]->label = 'TaHoma: Please register with your Somfy account!';
-        } else {
-            $result = json_decode($this->GetData($this->apiURL . '/v1/site'));
-
+            $visibility_register = true;
+        }
+        else{
+            $result = json_decode($this->GetAllUserSite());
             if ($result === false || $result === null || !is_countable($result)) {
-                $data->actions[1]->label = 'TaHoma: Error. Please check your internet connection or register again!';
+                $visibility_register1 = true;
+                $visibility_register2 = false;
+                $number = 0;
             } else {
-                $data->actions[1]->label = 'TaHoma: ' . sprintf('Found %d Sites', count($result));
+                $number = count($result);
+                $visibility_register1 = false;
+                $visibility_register2 = true;
             }
         }
 
-        return json_encode($data);
+        $form = [
+            [
+                'type' => 'Label',
+                'visible' => $visibility_register,
+                'caption' => 'TaHoma: Please register with your TaHoma account!'
+            ],
+            [
+                'type' => 'Label',
+                'visible' => $visibility_register1,
+                'caption' => 'TaHoma: Error. Please check your internet connection or register again!'
+            ],
+            [
+                'type' => 'Label',
+                'visible' => $visibility_register2,
+                'caption' => 'TaHoma: ' . sprintf('Found %d Sites', $number)
+            ],
+            [
+                'type' => 'Button',
+                'visible' => true,
+                'caption' => 'Register',
+                'onClick' => 'echo TAHOMA_Register($id);'
+            ]
+        ];
+        return $form;
+    }
+
+    /**
+     * return form actions by token
+     * @return array
+     */
+    protected function FormActions()
+    {
+        //Check Connect availability
+        $ids = IPS_GetInstanceListByModuleID('{9486D575-BE8C-4ED8-B5B5-20930E26DE6F}');
+        if (IPS_GetInstance($ids[0])['InstanceStatus'] != IS_ACTIVE) {
+            $visibility_label1 = true;
+            $visibility_label2 = false;
+        } else {
+            $visibility_label1 = false;
+            $visibility_label2 = true;
+        }
+        $form = [
+            [
+                'type' => 'Label',
+                'visible' => $visibility_label1,
+                'caption' => 'Error: Symcon Connect is not active!'
+            ],
+            [
+                'type' => 'Label',
+                'visible' => $visibility_label2,
+                'caption' => 'Status: Symcon Connect is OK!'
+            ]
+        ];
+        return $form;
+    }
+
+    /**
+     * return from status
+     * @return array
+     */
+    protected function FormStatus()
+    {
+        $form = [
+            [
+                'code' => IS_CREATING,
+                'icon' => 'inactive',
+                'caption' => 'Creating instance.'
+            ],
+            [
+                'code' => IS_ACTIVE,
+                'icon' => 'active',
+                'caption' => 'configuration valid.'
+            ],
+            [
+                'code' => IS_INACTIVE,
+                'icon' => 'inactive',
+                'caption' => 'interface closed.'
+            ],
+            [
+                'code' => 201,
+                'icon' => 'inactive',
+                'caption' => 'Please follow the instructions.'
+            ],
+            [
+                'code' => 202,
+                'icon' => 'error',
+                'caption' => 'no category selected.'
+            ]
+        ];
+
+        return $form;
     }
 }
