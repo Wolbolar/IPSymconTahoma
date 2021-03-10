@@ -269,7 +269,7 @@ class TaHomaCloud extends IPSModule
             $visibility_register = true;
         }
         else{
-            $result = json_decode($this->GetAllUserSite());
+            $result = $this->GetAllUserSite();
             if ($result === false || $result === null || !is_countable($result)) {
                 $visibility_register1 = true;
                 $visibility_register2 = false;
