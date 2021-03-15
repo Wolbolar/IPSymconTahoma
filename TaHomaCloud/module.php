@@ -267,6 +267,9 @@ class TaHomaCloud extends IPSModule
         //Check Gardena connection
         if ($this->ReadAttributeString('Token') == '') {
             $visibility_register = true;
+            $visibility_register1 = false;
+            $visibility_register2 = false;
+            $number = 0;
         }
         else{
             $result = $this->GetAllUserSite();
@@ -306,7 +309,7 @@ class TaHomaCloud extends IPSModule
         ];
         return $form;
     }
-
+    
     /**
      * return form actions by token
      * @return array
