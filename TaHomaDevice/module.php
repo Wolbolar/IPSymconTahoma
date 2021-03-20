@@ -428,7 +428,14 @@ class TaHomaDevice extends IPSModule
                     'label' => $this->Translate($this->ReadPropertyString('Type'))
                 ]
             ];
-            if (count($data['states']) > 0) {
+            if(isset($data['states']))
+            {
+                $number_states = count($data['states']);
+            }
+            else{
+                $number_states = 0;
+            }
+            if ($number_states > 0) {
                 $form = array_merge_recursive(
                     $form, [
                         [
