@@ -99,39 +99,42 @@ class TaHomaDevice extends IPSModule
     {
         // $type = $this->ReadPropertyString('Type');
         $data = $this->RequestStatus();
-        $categories = $data->categories;
-        $this->WriteAttributeString('categories', json_encode($categories));
-        $states = $data->states;
-        $this->WriteAttributeString('states', json_encode($states));
-        $capabilities = $data->capabilities;
-        $this->WriteAttributeString('capabilities', json_encode($capabilities));
+        if($data != [])
+        {
+            $categories = $data->categories;
+            $this->WriteAttributeString('categories', json_encode($categories));
+            $states = $data->states;
+            $this->WriteAttributeString('states', json_encode($states));
+            $capabilities = $data->capabilities;
+            $this->WriteAttributeString('capabilities', json_encode($capabilities));
 
-        if (count($data->states) > 0) {
-            $tahoma_interval = $this->ReadPropertyInteger('updateinterval');
-            $this->SetTaHomaInterval($tahoma_interval);
-        }
-        foreach ($capabilities as $capability) {
-            if ($capability->name === 'position') {
-                $this->SetupVariable(
-                    'position', $this->Translate('Position'), '~Intensity.100', $this->_getPosition(), VARIABLETYPE_INTEGER, true, true
-                );
+            if (count($data->states) > 0) {
+                $tahoma_interval = $this->ReadPropertyInteger('updateinterval');
+                $this->SetTaHomaInterval($tahoma_interval);
             }
+            foreach ($capabilities as $capability) {
+                if ($capability->name === 'position') {
+                    $this->SetupVariable(
+                        'position', $this->Translate('Position'), '~Intensity.100', $this->_getPosition(), VARIABLETYPE_INTEGER, true, true
+                    );
+                }
+            }
+
+            //Shutter Control Variable
+            $this->RegisterProfileAssociation(
+                'Tahoma.Control', 'Move', '', '', 0, 3, 0, 0, VARIABLETYPE_INTEGER, [
+                    [0, $this->Translate('Open'), 'HollowDoubleArrowUp', -1],
+                    [1, $this->Translate('Stop'), 'Close', -1],
+                    [2, $this->Translate('Close'), 'HollowDoubleArrowDown', -1]]
+            );
+            $this->SetupVariable(
+                'ControlShutter', $this->Translate('Control'), 'Tahoma.Control', $this->_getPosition(), VARIABLETYPE_INTEGER, true, true
+            );
+
+            $this->SetupVariable(
+                'low_speed', $this->Translate('low speed'), '~Switch', $this->_getPosition(), VARIABLETYPE_BOOLEAN, true, false
+            );
         }
-
-        //Shutter Control Variable
-        $this->RegisterProfileAssociation(
-            'Tahoma.Control', 'Move', '', '', 0, 3, 0, 0, VARIABLETYPE_INTEGER, [
-                [0, $this->Translate('Open'), 'HollowDoubleArrowUp', -1],
-                [1, $this->Translate('Stop'), 'Close', -1],
-                [2, $this->Translate('Close'), 'HollowDoubleArrowDown', -1]]
-        );
-        $this->SetupVariable(
-            'ControlShutter', $this->Translate('Control'), 'Tahoma.Control', $this->_getPosition(), VARIABLETYPE_INTEGER, true, true
-        );
-
-        $this->SetupVariable(
-            'low_speed', $this->Translate('low speed'), '~Switch', $this->_getPosition(), VARIABLETYPE_BOOLEAN, true, false
-        );
     }
 
     /** Variable anlegen / löschen
@@ -188,7 +191,8 @@ class TaHomaDevice extends IPSModule
 
     private function SetTaHomaInterval($tahoma_interval): void
     {
-        $interval = $tahoma_interval * 1000;
+        // todo Rate limit quota violation. Quota limit  exceeded
+        $interval = $tahoma_interval * 1000; // min update interval from somfy not known
         $this->SetTimerInterval('TaHomaUpdate', $interval);
     }
 
@@ -303,11 +307,14 @@ class TaHomaDevice extends IPSModule
     public function UpdateStatus()
     {
         $data = $this->RequestStatus();
-        if (count($data->states) > 0) {
-            foreach ($data->states as $state) {
-                if ($state->name === 'position') {
-                    $this->SetValue('position', $state->value);
-                    $this->WriteAttributeInteger('position', intval($state->value));
+        if($data != [])
+        {
+            if (count($data->states) > 0) {
+                foreach ($data->states as $state) {
+                    if ($state->name === 'position') {
+                        $this->SetValue('position', $state->value);
+                        $this->WriteAttributeInteger('position', intval($state->value));
+                    }
                 }
             }
         }
@@ -338,7 +345,6 @@ class TaHomaDevice extends IPSModule
 
     public function GetCommandList()
     {
-        $data = $this->RequestStatus();
         $type = $this->ReadPropertyString('Type');
 
         $form = [];
@@ -452,13 +458,18 @@ class TaHomaDevice extends IPSModule
         $SiteID = $this->ReadPropertyString('SiteID');
         $DeviceID = $this->ReadPropertyString('DeviceID');
         $Type = $this->ReadPropertyString('Type');
-        $data = false;
+        $check = false;
         if ($SiteID == '' || $DeviceID == '' || $Type == '') {
             $this->SetStatus(205);
         } elseif ($SiteID != '' && $DeviceID != '' && $Type != '') {
             $data = $this->RequestStatus();
+            $check = true;
+            if($data == [])
+            {
+                $check = false;
+            }
         }
-        return $data;
+        return $check;
     }
 
     public function RequestStatus()
@@ -467,16 +478,45 @@ class TaHomaDevice extends IPSModule
             'DataID' => '{656566E9-4C78-6C4C-2F16-63CDD4412E9E}',
             'Endpoint' => '/v1/device/' . $this->ReadPropertyString('DeviceID'),
             'Payload' => ''
-        ])));
-        $categories = $data->categories;
-        $this->WriteAttributeString('categories', json_encode($categories));
-        $states = $data->states;
-        $this->WriteAttributeString('states', json_encode($states));
-        $capabilities = $data->capabilities;
-        $this->WriteAttributeString('capabilities', json_encode($capabilities));
-        $available = $data->available;
-        $this->WriteAttributeBoolean('available', $available);
-        return $data;
+        ])), true);
+        $check = $this->CheckResponse($data);
+        if($check)
+        {
+            return $data;
+        }
+        else{
+            return [];
+        }
+    }
+
+    private function CheckResponse($data)
+    {
+        $check = false;
+        If(isset($data['categories']))
+        {
+            $categories = $data['categories'];
+            $this->WriteAttributeString('categories', json_encode($categories));
+        }
+        If(isset($data['states']))
+        {
+            $states = $data['states'];
+            $this->WriteAttributeString('states', json_encode($states));
+        }
+        If(isset($data['capabilities']))
+        {
+            $capabilities = $data['capabilities'];
+            $this->WriteAttributeString('capabilities', json_encode($capabilities));
+        }
+        If(isset($data['available']))
+        {
+            $available = $data['available'];
+            $this->WriteAttributeBoolean('available', $available);
+        }
+        If(isset($data['categories']) && isset($data['categories']) && isset($data['categories']) && isset($data['categories']))
+        {
+            $check = true;
+        }
+        return $check;
     }
 
     /**
