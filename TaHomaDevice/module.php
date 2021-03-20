@@ -433,7 +433,7 @@ class TaHomaDevice extends IPSModule
                 $number_states = count($data['states']);
             }
             else{
-                $number_states = 0;
+                $number_states = 1;
             }
             if ($number_states > 0) {
                 $form = array_merge_recursive(
@@ -444,7 +444,10 @@ class TaHomaDevice extends IPSModule
                         ],
                         [
                             'name' => 'updateinterval',
-                            'type' => 'IntervalBox',
+                            'type' => 'NumberSpinner',
+                            'minimum' => 5,
+                            'suffix' => 'seconds',
+                            'visible' => true,
                             'caption' => 'seconds'
                         ]]
                 );
