@@ -101,7 +101,7 @@ class TaHomaDevice extends IPSModule
         $data = $this->RequestStatus();
         if($data != [])
         {
-            $categories = $data->categories;
+            $categories = $data['categories'];
             $this->WriteAttributeString('categories', json_encode($categories));
             $states = $data['states'];
             $this->WriteAttributeString('states', json_encode($states));
