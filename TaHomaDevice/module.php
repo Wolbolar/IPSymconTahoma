@@ -103,17 +103,17 @@ class TaHomaDevice extends IPSModule
         {
             $categories = $data->categories;
             $this->WriteAttributeString('categories', json_encode($categories));
-            $states = $data->states;
+            $states = $data['states'];
             $this->WriteAttributeString('states', json_encode($states));
-            $capabilities = $data->capabilities;
+            $capabilities = $data['capabilities'];
             $this->WriteAttributeString('capabilities', json_encode($capabilities));
 
-            if (count($data->states) > 0) {
+            if (count($data['states']) > 0) {
                 $tahoma_interval = $this->ReadPropertyInteger('updateinterval');
                 $this->SetTaHomaInterval($tahoma_interval);
             }
             foreach ($capabilities as $capability) {
-                if ($capability->name === 'position') {
+                if ($capability['name'] === 'position') {
                     $this->SetupVariable(
                         'position', $this->Translate('Position'), '~Intensity.100', $this->_getPosition(), VARIABLETYPE_INTEGER, true, true
                     );
@@ -309,11 +309,11 @@ class TaHomaDevice extends IPSModule
         $data = $this->RequestStatus();
         if($data != [])
         {
-            if (count($data->states) > 0) {
-                foreach ($data->states as $state) {
-                    if ($state->name === 'position') {
-                        $this->SetValue('position', $state->value);
-                        $this->WriteAttributeInteger('position', intval($state->value));
+            if (count($data['states']) > 0) {
+                foreach ($data['states'] as $state) {
+                    if ($state['name'] === 'position') {
+                        $this->SetValue('position', $state['value']);
+                        $this->WriteAttributeInteger('position', intval($state['value']));
                     }
                 }
             }
@@ -428,7 +428,7 @@ class TaHomaDevice extends IPSModule
                     'label' => $this->Translate($this->ReadPropertyString('Type'))
                 ]
             ];
-            if (count($data->states) > 0) {
+            if (count($data['states']) > 0) {
                 $form = array_merge_recursive(
                     $form, [
                         [
@@ -512,7 +512,7 @@ class TaHomaDevice extends IPSModule
             $available = $data['available'];
             $this->WriteAttributeBoolean('available', $available);
         }
-        If(isset($data['categories']) && isset($data['categories']) && isset($data['categories']) && isset($data['categories']))
+        If(isset($data['categories']) && isset($data['states']) && isset($data['capabilities']) && isset($data['available']))
         {
             $check = true;
         }
