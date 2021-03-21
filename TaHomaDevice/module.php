@@ -409,6 +409,7 @@ class TaHomaDevice extends IPSModule
     protected function FormHead()
     {
         $data = $this->CheckRequest();
+        $device_id = $this->ReadPropertyString('DeviceID');
         if ($data != false) {
             $form = [
                 [
@@ -417,7 +418,7 @@ class TaHomaDevice extends IPSModule
                 ],
                 [
                     'type' => 'Label',
-                    'label' => $this->ReadPropertyString('DeviceID')
+                    'label' => $device_id
                 ],
                 [
                     'type' => 'Label',
@@ -426,32 +427,20 @@ class TaHomaDevice extends IPSModule
                 [
                     'type' => 'Label',
                     'label' => $this->Translate($this->ReadPropertyString('Type'))
+                ],
+                [
+                    'type' => 'Label',
+                    'label' => 'Update interval in seconds:'
+                ],
+                [
+                    'name' => 'updateinterval',
+                    'type' => 'NumberSpinner',
+                    'minimum' => 5,
+                    'suffix' => 'seconds',
+                    'visible' => true,
+                    'caption' => 'seconds'
                 ]
             ];
-            if(isset($data['states']))
-            {
-                $number_states = count($data['states']);
-            }
-            else{
-                $number_states = 1;
-            }
-            if ($number_states > 0) {
-                $form = array_merge_recursive(
-                    $form, [
-                        [
-                            'type' => 'Label',
-                            'label' => 'Update interval in seconds:'
-                        ],
-                        [
-                            'name' => 'updateinterval',
-                            'type' => 'NumberSpinner',
-                            'minimum' => 5,
-                            'suffix' => 'seconds',
-                            'visible' => true,
-                            'caption' => 'seconds'
-                        ]]
-                );
-            }
         } else {
             $form = [
                 [
