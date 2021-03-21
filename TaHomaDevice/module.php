@@ -489,6 +489,7 @@ class TaHomaDevice extends IPSModule
             'Endpoint' => '/v1/device/' . $this->ReadPropertyString('DeviceID'),
             'Payload' => ''
         ])), true);
+        $this->SendDebug('TaHoma Request Response:', json_encode($data), 0);
         $check = $this->CheckResponse($data);
         if($check)
         {
@@ -506,21 +507,25 @@ class TaHomaDevice extends IPSModule
         {
             $categories = $data['categories'];
             $this->WriteAttributeString('categories', json_encode($categories));
+            $this->SendDebug('TaHoma categories:', json_encode($categories), 0);
         }
         If(isset($data['states']))
         {
             $states = $data['states'];
             $this->WriteAttributeString('states', json_encode($states));
+            $this->SendDebug('TaHoma states:', json_encode($states), 0);
         }
         If(isset($data['capabilities']))
         {
             $capabilities = $data['capabilities'];
             $this->WriteAttributeString('capabilities', json_encode($capabilities));
+            $this->SendDebug('TaHoma capabilities:', json_encode($capabilities), 0);
         }
         If(isset($data['available']))
         {
             $available = $data['available'];
             $this->WriteAttributeBoolean('available', $available);
+            $this->SendDebug('TaHoma available:', json_encode($available), 0);
         }
         If(isset($data['categories']) && isset($data['states']) && isset($data['capabilities']) && isset($data['available']))
         {
