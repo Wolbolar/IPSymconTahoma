@@ -19,7 +19,18 @@
       "Address": "Adresse",
       "Type": "Typ",
       "Name": "Name",
-      "Site ID": "Seiten ID"
+      "Site ID": "Seiten ID",
+      "category for Somfy devices": "Kategorie der Somfy Geräte",
+      "category Somfy devices": "Kategorie Somfy Geräte",
+      "Somfy devices:": "Somfy devices:",
+      "Read Somfy devices:": "Somfy Geräte auslesen:",
+      "Read devices": "Geräte auslesen",
+      "Creating instance.": "Die Instanz wird erstellt.",
+      "interface closed.": "Verbindung geschlossen.",
+      "Please follow the instructions.": "Bitte der Anleitung folgen",
+      "no category selected.": "Keine Kategorie ausgewählt",
+      "choose category for import.": "Kategorie zum Import auswählen.",
+      "configuration valid.": "Konfigurator ist ok."
     }
   }
 }
