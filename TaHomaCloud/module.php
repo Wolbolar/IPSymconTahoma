@@ -82,7 +82,7 @@ class TaHomaCloud extends IPSModule
         if ($tahoma_interval < 60 && $tahoma_interval != 0) {
             $tahoma_interval = 60;
         }
-        $interval = $tahoma_interval * 1000 * 60; // minutes
+        $interval = $tahoma_interval * 1000 ; // seconds
         $this->SetTimerInterval('Update', $interval);
     }
 
